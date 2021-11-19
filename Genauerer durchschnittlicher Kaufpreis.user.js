@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Genauerer durchschnittlicher Kaufpreis
 // @namespace    http://tampermonkey.net/
-// @version      0.1
+// @version      0.2
 // @description  Genaueren durchschnittlichen Kaufpreis mit 4 Nachkommastellen wie in der App anzeigen. Der originale Wert bleibt absichtlich unangetastet!
 // @author       JokerGermany
 // @match        https://de.scalable.capital/broker/security?isin=*
@@ -40,7 +40,7 @@ for (let i = 0;i< divs.length;i++)
       //Durchschnitt errechnen
       let Ergebnis = Number(Kaufpreis)/Number(Stueck)
       //Durchschnitt mit 4 Nachkommastellen hinzufügen
-      divs[i].getElementsByTagName("span")[1].innerHTML += "<br>"+Ergebnis.toLocaleString("de-DE",{ minimumFractionDigits: 4 });
+      divs[i].innerHTML += "<br>"+Ergebnis.toLocaleString("de-DE",{ minimumFractionDigits: 4 });
 
    }
    //Kaufpreis ermitteln
