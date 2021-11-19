@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Westenliche Anlegerinformationen ausblenden
 // @namespace    http://tampermonkey.net/
-// @version      0.1
+// @version      0.2
 // @description  Westenliche Anlegerinformationen ausblenden
 // @author       JokerGermany
 // @match        https://de.scalable.capital/broker/security?isin=*
@@ -20,8 +20,6 @@ for (let i = 0;i< divs.length;i++){
 	divs[i].style.display = "none";
     divs[i+1].style.display = "none";
     divs[i-1].style.display = "none";
-    divs[i-2].style.display = "none";
-    divs[i-3].style.display = "none";
    }
 }
 
