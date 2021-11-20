@@ -1,55 +1,60 @@
 // ==UserScript==
 // @name         Genauerer durchschnittlicher Kaufpreis
 // @namespace    http://tampermonkey.net/
-// @version      0.2
+// @version      0.3
 // @description  Genaueren durchschnittlichen Kaufpreis mit 4 Nachkommastellen wie in der App anzeigen. Der originale Wert bleibt absichtlich unangetastet!
 // @author       JokerGermany
 // @match        https://de.scalable.capital/broker/security?isin=*
 // @icon         https://www.google.com/s2/favicons?domain=scalable.capital
 // @grant        none
 // ==/UserScript==
+function alarm() {
+    'use strict';
+   alert('Quelltext hat sich geändert - Genauerer durchschnittlicher Kaufpreis');
+}
+
 function isNumber(n) {
     'use strict';
     n = n.replace(/\./g, '').replace(',', '.');
     return parseFloat(n);
 }
-(function() {
+(function()
+ {
     'use strict';
-    var findDurchschnittKauf = /bei Kauf$/i;
-    var findStueck = /^Stück$/i;
+    try
+    {
+        //Stück bestimmen - Check ob sich die Webseite geändert hat.
+        if(document.getElementsByClassName("MuiGrid-root jss141 MuiGrid-container MuiGrid-item MuiGrid-direction-xs-column")[0].innerHTML.includes("Stück</div>"))
+        {
+            var Stueck = document.getElementsByClassName("MuiGrid-root jss141 MuiGrid-container MuiGrid-item MuiGrid-direction-xs-column")[0].getElementsByTagName("span")[0].innerHTML
+        }
+        else
+        {
+            alarm()
+        }
 
-var divs = document.getElementsByTagName("div");
-
-//Stückzahlen ermitteln
-for (let i = 0;i< divs.length;i++)
-{
-   if (findStueck.test(divs[i].innerHTML))
-   {
-    var Stueck = parseFloat(divs[i-1].getElementsByTagName("span")[0].innerHTML);
-   }
-}
-
-
-
-
-var found = 0
-for (let i = 0;i< divs.length;i++)
-{
-    if (findDurchschnittKauf.test(divs[i].innerHTML) && found == 1)
-   {
-      //Durchschnitt errechnen
-      let Ergebnis = Number(Kaufpreis)/Number(Stueck)
-      //Durchschnitt mit 4 Nachkommastellen hinzufügen
-      divs[i].innerHTML += "<br>"+Ergebnis.toLocaleString("de-DE",{ minimumFractionDigits: 4 });
-
-   }
-   //Kaufpreis ermitteln
-   if (findDurchschnittKauf.test(divs[i].innerHTML) && found == 0)
-   {
-      found = 1;
-      var Kaufpreis = isNumber(divs[i].getElementsByTagName("span")[1].innerHTML);
-   }
-
-}
-
+        //Kaufpreis bestimmen - Check ob sich die Webseite geändert hat.
+        if ( document.getElementsByClassName("MuiGrid-root jss149 MuiGrid-item")[0].innerHTML.includes("bei Kauf"))
+        {
+            var Kaufpreis = isNumber(document.getElementsByClassName("MuiGrid-root jss149 MuiGrid-item")[0].getElementsByTagName("span")[1].innerHTML);
+        }
+        else
+        {
+            alarm()
+        }
+        var Ergebnis = (Number(Kaufpreis)/Number(Stueck)).toLocaleString("de-DE",{ minimumFractionDigits: 4 })
+        ///Durchschnitt mit 4 Nachkommastellen hinzufügen - Check ob sich die Webseite geändert hat.
+        if ( document.getElementsByClassName("MuiGrid-root jss149 MuiGrid-item")[2].innerHTML.includes("bei Kauf"))
+        {
+            document.getElementsByClassName("MuiGrid-root jss149 MuiGrid-item")[2].innerHTML += "<br>"+Ergebnis;
+        }
+        else
+        {
+            alarm()
+        }
+    }
+    catch(err)
+    {
+        alarm()
+    }
 })();
