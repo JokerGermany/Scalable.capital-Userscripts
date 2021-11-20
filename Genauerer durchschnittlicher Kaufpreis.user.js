@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Genauerer durchschnittlicher Kaufpreis
 // @namespace    http://tampermonkey.net/
-// @version      0.3
+// @version      0.4
 // @description  Genaueren durchschnittlichen Kaufpreis mit 4 Nachkommastellen wie in der App anzeigen. Der originale Wert bleibt absichtlich unangetastet!
 // @author       JokerGermany
 // @match        https://de.scalable.capital/broker/security?isin=*
@@ -30,7 +30,7 @@ function isNumber(n) {
         }
         else
         {
-            alarm()
+            alarm();
         }
 
         //Kaufpreis bestimmen - Check ob sich die Webseite geändert hat.
@@ -40,9 +40,9 @@ function isNumber(n) {
         }
         else
         {
-            alarm()
+            alarm();
         }
-        var Ergebnis = (Number(Kaufpreis)/Number(Stueck)).toLocaleString("de-DE",{ minimumFractionDigits: 4 })
+        var Ergebnis = (Number(Kaufpreis)/Number(Stueck)).toLocaleString("de-DE",{ minimumFractionDigits: 4 });
         ///Durchschnitt mit 4 Nachkommastellen hinzufügen - Check ob sich die Webseite geändert hat.
         if ( document.getElementsByClassName("MuiGrid-root jss149 MuiGrid-item")[2].innerHTML.includes("bei Kauf"))
         {
@@ -50,11 +50,11 @@ function isNumber(n) {
         }
         else
         {
-            alarm()
+            alarm();
         }
     }
     catch(err)
     {
-        alarm()
+        alarm();
     }
 })();
