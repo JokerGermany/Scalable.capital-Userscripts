@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Transaktionen in Tabelle
 // @namespace    https://github.com/JokerGermany/Scalable.capital-Userscripts
-// @version      0.1
+// @version      0.2
 // @description  NOCH NICHT NUTZEN!
 // @author       JokerGermany
 // @match        https://de.scalable.capital/broker/security?isin=*
@@ -202,7 +202,7 @@ function isNumber(n) {
                 if (Offen == 1 && document.getElementsByClassName("jss62")[0].parentNode.parentNode.childNodes[1].getElementsByClassName("jss160")[0].innerHTML == "Offen")
                 {
                     //TransaktionAbschnitt(1,document.getElementsByClassName("jss62")[0].parentNode.parentNode.childNodes[1].getElementsByClassName("jss159")[0].parentNode.parentNode.childNodes[1].childNodes);
-                    var offeneOrder = TransaktionAbschnitt(1,document.getElementsByClassName("jss62")[0].parentNode.parentNode.childNodes[1].getElementsByClassName("jss160")[0]).sort(function(a, b){return a - b});
+                    var offeneOrder = TransaktionAbschnitt(1,document.getElementsByClassName("jss62")[0].parentNode.parentNode.childNodes[1].getElementsByClassName("jss160")[0]).sort(function(a, b){return a[1] - b[1]});
                     //var sellOpen = lowSellhighBuy[2].sort(function(a, b){return a - b});
                     //var buyOpen = lowSellhighBuy[3].sort(function(a, b){return b - a});
                     /* for (let i = 0; i < sellOpen.length; i++)
