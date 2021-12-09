@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Mehr Transaktionsinformationen ohne ausklappen
 // @namespace    https://github.com/JokerGermany/Scalable.capital-Userscripts
-// @version      0.1
-// @description  Alle Informationen auf einen Blick, nur noch zum stornieren von offenen Transaktionen muss ausgeklappt werden.
+// @version      0.2
+// @description  Alle Informationen auf einen Blick, nur noch zum stornieren von offenen Transaktionen muss ausgeklappt werden. Alte Transaktionen werden gelöscht.
 // @author       JokerGermany
 // @match        https://de.scalable.capital/broker/security?isin=*
 // @icon         https://www.google.com/s2/favicons?domain=scalable.capital
@@ -10,44 +10,48 @@
 // ==/UserScript==
 function transaktionOrderDurchsuchen(Offen, Ort)
 {
-    var limitStopPreis;
-    //var icon;
-    var ausfuehrungsPreis;
-    var stueck;
-    var gesamt;
-    var ordertyp
-    if (Ort.querySelector('[data-testid="error-reason"]') == null)
-    {
-        var findVerkauf = />Verkauf<\/span>/i;
-        var findKauf = />Kauf<\/span>/i;
-        if (findVerkauf.test(Ort.innerHTML) || findKauf.test(Ort.innerHTML) )
+    //console.log("subtitle: "+Ort.querySelector('[data-testid="transaction-subtitle"]').innerHTML);
+    //console.log("title: "+document.getElementsByClassName("jss82")[0].getElementsByTagName("span")[0].getElementsByTagName("span")[0].innerHTML)
+    //if (Ort.querySelector('[data-testid="transaction-subtitle"]').innerHTML == document.getElementsByClassName("jss82")[0].getElementsByTagName("span")[0].getElementsByTagName("span")[0].innerHTML)
+    //{
+        var limitStopPreis;
+        //var icon;
+        var ausfuehrungsPreis;
+        var stueck;
+        var gesamt;
+        var ordertyp
+        if (Ort.querySelector('[data-testid="error-reason"]') == null)
         {
-            var limitStopPreisString;
-            if (findVerkauf.test(Ort.innerHTML))
+            var findVerkauf = />Verkauf<\/span>/i;
+            var findKauf = />Kauf<\/span>/i;
+            if (findVerkauf.test(Ort.innerHTML) || findKauf.test(Ort.innerHTML) )
             {
-                ordertyp="sell";
-            }
-            else if (findKauf.test(Ort.innerHTML))
-            {
-                ordertyp="buy";
-            }
-            else
-            {
-                 console.log("Achtung: Nicht verkauf oder kauf! Irgendetwas läuft hier gewaltig schief...");
-                alarm();
-            }
+                var limitStopPreisString;
+                if (findVerkauf.test(Ort.innerHTML))
+                {
+                    ordertyp="sell";
+                }
+                else if (findKauf.test(Ort.innerHTML))
+                {
+                    ordertyp="buy";
+                }
+                else
+                {
+                    console.log("Achtung: Nicht verkauf oder kauf! Irgendetwas läuft hier gewaltig schief...");
+                    alarm();
+                }
 
-            if (Offen==1 && Ort.querySelector('[data-testid="icon-PENDING"]') != null )
-            {
-              /*//Icon
+                if (Offen==1 && Ort.querySelector('[data-testid="icon-PENDING"]') != null )
+                {
+                    /*//Icon
               var cancel = Ort.querySelector('[data-testid="cancel-order-button"]');
               cancel.innerHTML = Ort.querySelector('[data-testid="icon-PENDING"]').outerHTML;
               icon=cancel.outerHTML;
               */
-              //Beauftragte Stückzahl
-              stueck = isNumber(Ort.querySelector('[aria-labelledby="Beauftragte Stückzahl"]').getElementsByTagName("span")[0].innerHTML);
-            }
-            /*
+                    //Beauftragte Stückzahl
+                    stueck = isNumber(Ort.querySelector('[aria-labelledby="Beauftragte Stückzahl"]').getElementsByTagName("span")[0].innerHTML);
+                }
+                /*
             else if (Ort.querySelector('[data-testid="icon-SELL"]') != null)
             {
                 icon=Ort.querySelector('[data-testid="icon-SELL"]').outerHTML;
@@ -62,49 +66,43 @@ function transaktionOrderDurchsuchen(Offen, Ort)
                alarm();
             }*/
             //limitStopPreis
-            if (Ort.querySelector('[aria-labelledby="Limitpreis"]') != null)
-            {
-                limitStopPreis = isNumber(Ort.querySelector('[aria-labelledby="Limitpreis"]').getElementsByTagName("span")[0].innerHTML);
-                limitStopPreisString = " Limitpreis: "+limitStopPreis;
-            }
-            else if (Ort.querySelector('[aria-labelledby="Stoppreis"]') != null)
-            {
-                limitStopPreis = isNumber(Ort.querySelector('[aria-labelledby="Stoppreis"]').getElementsByTagName("span")[0].innerHTML);
-                limitStopPreisString = " Stoppreis: "+limitStopPreis;
-            }
-             if (Offen == 0 && Ort.querySelector('[data-testid="icon-PENDING"]') == null )
-            {
-                //ausführungsPreis
-                ausfuehrungsPreis = isNumber(Ort.querySelector('[aria-labelledby="Ausführungspreis"]').getElementsByTagName("span")[0].innerHTML);
-                //Ausgeführte Stückzahl
-                stueck = isNumber(Ort.querySelector('[aria-labelledby="Ausgeführte Stückzahl"]').getElementsByTagName("span")[0].innerHTML);
-                //gesamt
-                gesamt = isNumber(Ort.querySelector('[aria-labelledby="Kurswert"]').getElementsByTagName("span")[0].innerHTML);
-                Ort.querySelector('[data-testid="transaction-subtitle"]').innerHTML = "Stück: "+stueck+" AusfuehrungsPreis: "+ausfuehrungsPreis+limitStopPreisString;
-            }
-            else if (Offen==1 && Ort.querySelector('[data-testid="icon-PENDING"]') != null )
-            {
-                Ort.querySelector('[data-testid="transaction-subtitle"]').innerHTML = "Stück: "+stueck+limitStopPreisString;
-            }
+                if (Ort.querySelector('[aria-labelledby="Limitpreis"]') != null)
+                {
+                    limitStopPreis = isNumber(Ort.querySelector('[aria-labelledby="Limitpreis"]').getElementsByTagName("span")[0].innerHTML);
+                    limitStopPreisString = " Limitpreis: "+limitStopPreis;
+                }
+                else if (Ort.querySelector('[aria-labelledby="Stoppreis"]') != null)
+                {
+                    limitStopPreis = isNumber(Ort.querySelector('[aria-labelledby="Stoppreis"]').getElementsByTagName("span")[0].innerHTML);
+                    limitStopPreisString = " Stoppreis: "+limitStopPreis;
+                }
+                if (Offen == 0 && Ort.querySelector('[data-testid="icon-PENDING"]') == null )
+                {
+                    //ausführungsPreis
+                    ausfuehrungsPreis = isNumber(Ort.querySelector('[aria-labelledby="Ausführungspreis"]').getElementsByTagName("span")[0].innerHTML);
+                    //Ausgeführte Stückzahl
+                    stueck = isNumber(Ort.querySelector('[aria-labelledby="Ausgeführte Stückzahl"]').getElementsByTagName("span")[0].innerHTML);
+                    //gesamt
+                    gesamt = isNumber(Ort.querySelector('[aria-labelledby="Kurswert"]').getElementsByTagName("span")[0].innerHTML);
+                    Ort.querySelector('[data-testid="transaction-subtitle"]').innerHTML = "Stück: "+stueck+" AusfuehrungsPreis: "+ausfuehrungsPreis+limitStopPreisString;
+                }
+                else if (Offen==1 && Ort.querySelector('[data-testid="icon-PENDING"]') != null )
+                {
+                    Ort.querySelector('[data-testid="transaction-subtitle"]').innerHTML = "Stück: "+stueck+limitStopPreisString;
+                }
 
-             //sell.push(testSell);
-            //console.log(testSell);
-        }
-    }
-    else if ( Ort.querySelector('[data-testid="error-reason"]') != null && Ort.querySelector('[data-testid="error-reason"]').innerHTML != "Storniert" )
-    {
-        ordertyp="Storno";
-    }
-    /*if ( findVerkauf.test(Ort.innerHTML) || findKauf.test(Ort.innerHTML) ||Ort.querySelector('[data-testid="error-reason"]') != null && Ort.querySelector('[data-testid="error-reason"]').innerHTML != "Storniert" )
-    {
-        //return [icon,limitStopPreis,ausfuehrungsPreis,stueck,gesamt,ordertyp];
-        return [limitStopPreis,ausfuehrungsPreis,stueck,gesamt,ordertyp];
-    }
-        else
+                //sell.push(testSell);
+                //console.log(testSell);
+                return [limitStopPreis,ausfuehrungsPreis,stueck,gesamt,ordertyp];
+            }
+        //}
+
+   /*     else
     {
         console.log("Achtung: Nicht storniert, verkauf oder kauf!");
         alarm();
     }*/
+    }
 }
 
 /*function TransaktionAbschnitt(Offen, Ort)
@@ -221,18 +219,31 @@ function isNumber(n) {
                 //if (Offen == 1 && document.getElementsByClassName("jss62")[0].parentNode.parentNode.childNodes[1].getElementsByClassName("jss160")[0].innerHTML == "Offen")
                 //{
                     //TransaktionAbschnitt(1,document.getElementsByClassName("jss62")[0].parentNode.parentNode.childNodes[1].getElementsByClassName("jss159")[0].parentNode.parentNode.childNodes[1].childNodes);
-                for (let i = document.getElementsByClassName("jss62")[0].parentNode.parentNode.childNodes[1].getElementsByClassName("jss160").length-1;i >= 0;i--)
+                //for (let i = document.getElementsByClassName("jss62")[0].parentNode.parentNode.childNodes[1].getElementsByClassName("jss160").length-1;i >= 0;i--)
+                var aktuelleOrder = [];
+                var aktuelleTransaktion;
+                var i;
+                for (i = 0; i < document.getElementsByClassName("jss62")[0].parentNode.parentNode.childNodes[1].getElementsByClassName("jss160").length;i++)
                 {
                     for (let j = document.getElementsByClassName("jss62")[0].parentNode.parentNode.childNodes[1].getElementsByClassName("jss160")[i].parentNode.parentNode.childNodes[1].childNodes.length-1;j >= 0;j--)
                     {
-                        if (i != 0)
+                        if (i != 0 || Offen == 0)
                         {
-                            transaktionOrderDurchsuchen(0, document.getElementsByClassName("jss62")[0].parentNode.parentNode.childNodes[1].getElementsByClassName("jss160")[i].parentNode.parentNode.childNodes[1].childNodes[j]);
+                            aktuelleTransaktion = transaktionOrderDurchsuchen(0, document.getElementsByClassName("jss62")[0].parentNode.parentNode.childNodes[1].getElementsByClassName("jss160")[i].parentNode.parentNode.childNodes[1].childNodes[j]);
+                            if (aktuelleTransaktion != null)
+                            {
+                                aktuelleOrder.push(aktuelleTransaktion);
+                                aktuelleTransaktion = null;
+                            }
                         }
                         else
                         {
                             transaktionOrderDurchsuchen(1, document.getElementsByClassName("jss62")[0].parentNode.parentNode.childNodes[1].getElementsByClassName("jss160")[i].parentNode.parentNode.childNodes[1].childNodes[j]);
                         }
+                    }
+                    if ( aktuelleOrder.length != 0)
+                    {
+                        break;
                     }
                 }
 
@@ -299,10 +310,11 @@ function isNumber(n) {
                         }
                     }
                     break;
-                }
+                }*/
                 maxAnzahlTransaktionen = i+1;
                 var schleifenlaenge = document.getElementsByClassName("jss62")[0].parentNode.parentNode.childNodes[1].getElementsByClassName("jss160").length;
                 //console.log("Zaehler: "+i);
+                var delElement
                 while ( (maxAnzahlTransaktionen+1) <= schleifenlaenge )
                 {
                     //console.log("maxAnzahlTransaktionen: "+maxAnzahlTransaktionen);
@@ -315,11 +327,13 @@ function isNumber(n) {
                         //console.log("Zaehler: "+i);
                         //console.log("Datum: "+document.getElementsByClassName("jss62")[0].parentNode.parentNode.childNodes[1].getElementsByClassName("jss160")[i].innerHTML);
                         //console.log(document.getElementsByClassName("jss62")[0].parentNode.parentNode.childNodes[1].getElementsByClassName("jss160")[i].parentNode.parentNode.innerHTML);
-                        document.getElementsByClassName("jss62")[0].parentNode.parentNode.childNodes[1].getElementsByClassName("jss160")[i].parentNode.parentNode.replaceChildren();
+                        delElement = document.getElementsByClassName("jss62")[0].parentNode.parentNode.childNodes[1].getElementsByClassName("jss160")[i].parentNode.parentNode;
+                        delElement.replaceChildren();
+                        delElement.remove();
                         i++;
                     }
                     //console.log("schleifenlänge: "+document.getElementsByClassName("jss62")[0].parentNode.parentNode.childNodes[1].getElementsByClassName("jss160").length);
-                }*/
+                }
             /*}
             else
             {
