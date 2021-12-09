@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Mehr Transaktionsinformationen ohne ausklappen
 // @namespace    https://github.com/JokerGermany/Scalable.capital-Userscripts
-// @version      0.2
-// @description  Alle Informationen auf einen Blick, nur noch zum stornieren von offenen Transaktionen muss ausgeklappt werden. Alte Transaktionen werden gelöscht.
+// @version      0.3
+// @description  Alle Informationen auf einen Blick, nur noch zum stornieren von offenen Transaktionen muss ausgeklappt werden. Alte Transaktionen und wesentliche Anlegerinformationen werden optional gelöscht.
 // @author       JokerGermany
 // @match        https://de.scalable.capital/broker/security?isin=*
 // @icon         https://www.google.com/s2/favicons?domain=scalable.capital
@@ -185,14 +185,47 @@ function isNumber(n) {
     var maxAnzahlTransaktionen;
     //setInterval(function()
     //{
-        console.log("Einträge: "+document.getElementsByClassName("jss62")[0].parentNode.parentNode.childNodes[1].getElementsByClassName("jss160").length+"maxAnzahlTransaktionen: "+maxAnzahlTransaktionen+" BUY:"+!(window.location.href.includes("BUY"))+" Sell:"+!(window.location.href.includes("SELL")));
+    if ( !(window.location.href.includes("BUY")) && !(window.location.href.includes("SELL")) )
+    {
+        var wesentlicheAnlegerinformationenAusblenden = 1;
+        var alteTransaktionenAusblenden = 1;
+        const d = new Date();
+        let day = d.getDay()
+        let hour = d.getHours()
+        var oeffnungszeiten = day != 0 && day !=6 && hour < 22 && hour > 7;
+
+        //oeffnungszeiten = true;
+
+        var divs = document.getElementsByTagName("div");
+
+        if (wesentlicheAnlegerinformationenAusblenden == 1 && oeffnungszeiten)
+        {
+
+            var Eckdaten = /^Eckdaten$/i;
+            for (let i = 0;i< divs.length;i++)
+            {
+                if (Eckdaten.test(divs[i].innerHTML))
+                {
+                    //Doppelcheck!
+                    if (divs[i-1].innerHTML.includes("Eckdaten"))
+                    {
+                        divs[i-1].remove();
+                    }
+                    if (divs[i+1].innerHTML.includes("Wesentlichen Anlegerinformationen"))
+                    {
+                        divs[i+1].remove();
+                    }
+                }
+            }
+
+        }
+        //console.log("Einträge: "+document.getElementsByClassName("jss62")[0].parentNode.parentNode.childNodes[1].getElementsByClassName("jss160").length+"maxAnzahlTransaktionen: "+maxAnzahlTransaktionen+" BUY:"+!(window.location.href.includes("BUY"))+" Sell:"+!(window.location.href.includes("SELL")));
         //console.log("MaxAnzahlTransaktionen: "+maxAnzahlTransaktionen+" Schleifenlänge: "+document.getElementsByClassName("jss62")[0].parentNode.parentNode.childNodes[1].getElementsByClassName("jss160").length);
         //if ( maxAnzahlTransaktionen == null && !(window.location.href.includes("BUY")) && !(window.location.href.includes("SELL"))
         //    || maxAnzahlTransaktionen < document.getElementsByClassName("jss62")[0].parentNode.parentNode.childNodes[1].getElementsByClassName("jss160").length && !(window.location.href.includes("BUY")) && !(window.location.href.includes("SELL")))
         //{
             var findOffen = />Offen<\/span>$/i;
             var Offen = 0;
-            var divs = document.getElementsByTagName("div");
             //Kontrollfunktion - Gibt es offene Transaktionen?
             for (let i = 0;i< divs.length;i++)
             {
@@ -241,7 +274,7 @@ function isNumber(n) {
                             transaktionOrderDurchsuchen(1, document.getElementsByClassName("jss62")[0].parentNode.parentNode.childNodes[1].getElementsByClassName("jss160")[i].parentNode.parentNode.childNodes[1].childNodes[j]);
                         }
                     }
-                    if ( aktuelleOrder.length != 0)
+                    if ( aktuelleOrder.length != 0 && alteTransaktionenAusblenden == 1 && oeffnungszeiten )
                     {
                         break;
                     }
@@ -311,6 +344,8 @@ function isNumber(n) {
                     }
                     break;
                 }*/
+    if (alteTransaktionenAusblenden == 1 && oeffnungszeiten )
+    {
                 maxAnzahlTransaktionen = i+1;
                 var schleifenlaenge = document.getElementsByClassName("jss62")[0].parentNode.parentNode.childNodes[1].getElementsByClassName("jss160").length;
                 //console.log("Zaehler: "+i);
@@ -328,12 +363,12 @@ function isNumber(n) {
                         //console.log("Datum: "+document.getElementsByClassName("jss62")[0].parentNode.parentNode.childNodes[1].getElementsByClassName("jss160")[i].innerHTML);
                         //console.log(document.getElementsByClassName("jss62")[0].parentNode.parentNode.childNodes[1].getElementsByClassName("jss160")[i].parentNode.parentNode.innerHTML);
                         delElement = document.getElementsByClassName("jss62")[0].parentNode.parentNode.childNodes[1].getElementsByClassName("jss160")[i].parentNode.parentNode;
-                        delElement.replaceChildren();
                         delElement.remove();
                         i++;
                     }
                     //console.log("schleifenlänge: "+document.getElementsByClassName("jss62")[0].parentNode.parentNode.childNodes[1].getElementsByClassName("jss160").length);
                 }
+    }
             /*}
             else
             {
@@ -343,6 +378,6 @@ function isNumber(n) {
        //}
 
 
-        //}
+        }
           //      , 30000);
 })();
