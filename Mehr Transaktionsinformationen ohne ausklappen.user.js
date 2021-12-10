@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mehr Transaktionsinformationen ohne ausklappen
 // @namespace    https://github.com/JokerGermany/Scalable.capital-Userscripts
-// @version      0.3
+// @version      0.4
 // @description  Alle Informationen auf einen Blick, nur noch zum stornieren von offenen Transaktionen muss ausgeklappt werden. Alte Transaktionen und wesentliche Anlegerinformationen werden optional gelöscht.
 // @author       JokerGermany
 // @match        https://de.scalable.capital/broker/security?isin=*
@@ -183,12 +183,14 @@ function isNumber(n) {
  {
     'use strict';
     var maxAnzahlTransaktionen;
-    //setInterval(function()
-    //{
+    var save;
+    setInterval(function()
+    {
     if ( !(window.location.href.includes("BUY")) && !(window.location.href.includes("SELL")) )
     {
         var wesentlicheAnlegerinformationenAusblenden = 1;
         var alteTransaktionenAusblenden = 1;
+        var genauererDurchschnittlicherKaufpreis = 1;
         const d = new Date();
         let day = d.getDay()
         let hour = d.getHours()
@@ -197,6 +199,68 @@ function isNumber(n) {
         //oeffnungszeiten = true;
 
         var divs = document.getElementsByTagName("div");
+
+        //check ob vorher BUY/Sell FEnster offen war + Kontrollfunktion - Gibt es offene Transaktionen?
+        var findTransaktionen = /^Eckdaten$/i
+        var findOffen = />Offen<\/span>$/i;
+            var Offen = 0;
+            for (let i = 0;i< divs.length;i++)
+            {
+                if (findOffen.test(divs[i].innerHTML))
+                {
+                    Offen = 1;
+                }
+                if (findTransaktionen.test(divs[i].innerHTML))
+                {
+                    if (document.getElementsByClassName("jss62")[0] == null || document.getElementsByClassName("jss62")[0].innerHTML != "Transaktionen")
+                    {
+                        //Wenn Transaktion gefunden, aber nicht in Element jss62, dann neu Laden
+                        location.reload();
+                    }
+                    if (Offen == 1)
+                    {
+                        break;
+                    }
+                }
+            }
+
+        if (genauererDurchschnittlicherKaufpreis == 1 && oeffnungszeiten)
+        {
+            if (!(window.location.href.includes("BUY")) && !(window.location.href.includes("SELL")) && save != document.getElementsByClassName("MuiGrid-root jss151 MuiGrid-item")[2].innerHTML)
+            {
+                //Stück bestimmen - Check ob sich die Webseite geändert hat.
+                if(document.getElementsByClassName("MuiGrid-root jss142 MuiGrid-container MuiGrid-item MuiGrid-direction-xs-column")[0].innerHTML.includes("Stück</div>"))
+                {
+                    var Stueck = document.getElementsByClassName("MuiGrid-root jss142 MuiGrid-container MuiGrid-item MuiGrid-direction-xs-column")[0].getElementsByTagName("span")[0].innerHTML
+                    }
+                else
+                {
+                    alarm("Stück");
+                }
+
+                //Kaufpreis bestimmen - Check ob sich die Webseite geändert hat.
+                if ( document.getElementsByClassName("MuiGrid-root jss151 MuiGrid-item")[0].innerHTML.includes("bei Kauf"))
+                {
+                    var Kaufpreis = isNumber(document.getElementsByClassName("MuiGrid-root jss151 MuiGrid-item")[0].getElementsByTagName("span")[1].innerHTML);
+                }
+                else
+                {
+                    alarm("Kaufpreis");
+                }
+                var Ergebnis = (Number(Kaufpreis)/Number(Stueck)).toLocaleString("de-DE",{ minimumFractionDigits: 4 });
+                ///Durchschnitt mit 4 Nachkommastellen hinzufügen - Check ob sich die Webseite geändert hat.
+                if ( document.getElementsByClassName("MuiGrid-root jss151 MuiGrid-item")[2].innerHTML.includes("bei Kauf"))
+                {
+                    document.getElementsByClassName("MuiGrid-root jss151 MuiGrid-item")[2].innerHTML += "<br>"+Ergebnis;
+                    save = document.getElementsByClassName("MuiGrid-root jss151 MuiGrid-item")[2].innerHTML;
+                }
+                else
+                {
+                    alarm("Ergebnis eintragen");
+                }
+            }
+        }
+
 
         if (wesentlicheAnlegerinformationenAusblenden == 1 && oeffnungszeiten)
         {
@@ -224,17 +288,7 @@ function isNumber(n) {
         //if ( maxAnzahlTransaktionen == null && !(window.location.href.includes("BUY")) && !(window.location.href.includes("SELL"))
         //    || maxAnzahlTransaktionen < document.getElementsByClassName("jss62")[0].parentNode.parentNode.childNodes[1].getElementsByClassName("jss160").length && !(window.location.href.includes("BUY")) && !(window.location.href.includes("SELL")))
         //{
-            var findOffen = />Offen<\/span>$/i;
-            var Offen = 0;
-            //Kontrollfunktion - Gibt es offene Transaktionen?
-            for (let i = 0;i< divs.length;i++)
-            {
-                if (findOffen.test(divs[i].innerHTML))
-                {
-                    Offen = 1;
-                    break;
-                }
-            }
+            
             //console.log("Offen? "+document.getElementsByClassName("jss62")[0].parentNode.parentNode.childNodes[1].getElementsByClassName("jss160")[0].innerHTML);
             //console.log("Offen: "+Offen);
             //Gibt es Trades? - Aus Sicherheitsgründen funktioniert das Skript nicht, wenn noch keine Order abgegeben wurde.
@@ -375,9 +429,9 @@ function isNumber(n) {
                 console.log("Offen: "+Offen+" Transaktion: "+document.getElementsByClassName("jss62")[0].innerHTML);
                 alarm();
             }*/
-       //}
+       }
 
 
         }
-          //      , 30000);
+                , 15000);
 })();
