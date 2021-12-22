@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mehr Transaktionsinformationen ohne ausklappen
 // @namespace    https://github.com/JokerGermany/Scalable.capital-Userscripts
-// @version      0.5
+// @version      0.6
 // @description  Alle Informationen auf einen Blick, nur noch zum stornieren von offenen Transaktionen muss die Übersicht aufgerufen werden. Wesentliche Anlegerinformationen werden optional gelöscht.
 // @author       JokerGermany
 // @match        https://de.scalable.capital/broker/security?isin=*
@@ -268,8 +268,8 @@ function doagain([durchschnitt, produktdetailsGefunden])
                 if (erwartetTransaktionen == null || erwartetTransaktionen.innerHTML != "Transaktionen")
                 {
                     //Wenn Transaktion gefunden, aber nicht in Element jss62, dann neu Laden
-                    //window.open(location.href);
-                    //window.close();
+                    window.open(location.href);
+                    window.close();
                     alert('neustart - Mehr Transaktionsinformationen ohne ausklappen');
                     //window.open(location.href);
                     //window.close();
