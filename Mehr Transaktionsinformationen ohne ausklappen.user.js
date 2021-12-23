@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mehr Transaktionsinformationen ohne ausklappen
 // @namespace    https://github.com/JokerGermany/Scalable.capital-Userscripts
-// @version      0.8
+// @version      0.9
 // @description  Alle Informationen auf einen Blick, nur noch zum stornieren von offenen Transaktionen muss die Übersicht aufgerufen werden. Wesentliche Anlegerinformationen werden optional gelöscht.
 // @author       JokerGermany
 // @match        https://de.scalable.capital/broker/security?isin=*
@@ -119,7 +119,10 @@ function transaktionOrderDurchsuchen(Ort)
                                 }
                                 if (orderUebersicht[i].querySelector('[data-testid="value-Ausführungspreis"]') != null && Offen == false)
                                 {
-                                    var ausfuehrungsPreisString = orderUebersicht[i].querySelector('[data-testid="value-Ausführungspreis"]').innerHTML;
+                                    stueck = orderUebersicht[i].querySelector('[data-testid="value-Ausgeführte Stückzahl"]').getElementsByTagName("span")[0].innerHTML;
+                                    var kurswert = isNumber(orderUebersicht[i].querySelector('[data-testid="value-Kurswert"]').innerHTML);
+                                    console.log("Stück: "+stueck+" Kurswert:"+kurswert);
+                                    var ausfuehrungsPreisString = (Number(kurswert)/Number(stueck)).toLocaleString("de-DE",{ maximumFractionDigits: 4 });
                                     if ( Ort.getElementsByClassName(transaktionETFNameClass)[0].innerHTML == ETFName )
                                     {
                                         Ort.getElementsByClassName(transaktionETFNameClass)[0].innerHTML = "Ausführungspreis: "+ausfuehrungsPreisString;
@@ -134,6 +137,7 @@ function transaktionOrderDurchsuchen(Ort)
                                     console.log("Beim Ausführungspreis läuft was falsch");
                                     alarm();
                                 }
+
 
                                 orderUebersicht[i].getElementsByClassName("MuiButton-label")[0].click();
                                 //document.getElementsByClassName("MuiDialog-root")[0].remove();
@@ -303,7 +307,7 @@ function doagain([durchschnitt, produktdetailsGefunden])
             }
         }
 
-        if (genauererDurchschnittlicherKaufpreis == 1 && oeffnungszeiten)
+        if (genauererDurchschnittlicherKaufpreis == 1)
         {
             var erwartetesDurchschnittsKaufpreisFeld = document.getElementsByClassName("MuiGrid-root jss152 MuiGrid-item");
             //console.log("Durchschnitt: "+erwartetesDurchschnittsKaufpreisFeld[2].outerHTML);
@@ -330,7 +334,7 @@ function doagain([durchschnitt, produktdetailsGefunden])
                 {
                     alarm("Kaufpreis");
                 }
-                durchschnitt = (Number(Kaufpreis)/Number(Stueck)).toLocaleString("de-DE",{ minimumFractionDigits: 4 });
+                durchschnitt = (Number(Kaufpreis)/Number(Stueck)).toLocaleString("de-DE",{ maximumFractionDigits: 4 });
                 //console.log("Durchschnitt: "+durchschnitt);
                 ///Durchschnitt mit 4 Nachkommastellen hinzufügen - Check ob sich die Webseite geändert hat.
                 if ( erwartetesDurchschnittsKaufpreisFeld[2].outerHTML.includes("bei Kauf</div>"))
