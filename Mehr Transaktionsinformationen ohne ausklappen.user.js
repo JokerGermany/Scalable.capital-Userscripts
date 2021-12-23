@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mehr Transaktionsinformationen ohne ausklappen
 // @namespace    https://github.com/JokerGermany/Scalable.capital-Userscripts
-// @version      0.7
+// @version      0.8
 // @description  Alle Informationen auf einen Blick, nur noch zum stornieren von offenen Transaktionen muss die Übersicht aufgerufen werden. Wesentliche Anlegerinformationen werden optional gelöscht.
 // @author       JokerGermany
 // @match        https://de.scalable.capital/broker/security?isin=*
@@ -21,27 +21,6 @@ function verkaufKaufKlicken() {
         params.set('type', "SELL");
     }
     location.search = params.toString();
-}
-function wesentlicheAnlegerinformationenAusblenden(divs)
-{
-    var Produktdetails = /^Produktdetails$/i;
-            for (let i = 0;i< divs.length;i++)
-            {
-                if (Produktdetails.test(divs[i].innerHTML))
-                    {
-                        //Doppelcheck!
-                        if (divs[i-1].innerHTML.includes("Produktdetails"))
-                        {
-                            if (divs[i+1].innerHTML.includes("Wesentlichen Anlegerinformationen"))
-                            {
-                                divs[i+1].remove();
-                            }
-                            divs[i-2].remove();
-                            divs[i-1].remove();
-                        }
-                        return true;
-                    }
-            }
 }
 
 function transaktionOrderDurchsuchen(Ort)
@@ -266,7 +245,7 @@ function doagain([durchschnitt, produktdetailsGefunden])
             }
             erwartetTransaktionen = document.getElementsByClassName("jss150")[1];
         }
-        if (wesentlicheAnlegerinformationenAusblendenVar != 1)
+        if (wesentlicheAnlegerinformationenAusblendenVar != 1 || oeffnungszeiten == false )
         {
             erwartetTransaktionen = document.getElementsByClassName("jss150")[2];
         }
