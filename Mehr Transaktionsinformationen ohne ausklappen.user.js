@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mehr Transaktionsinformationen ohne ausklappen
 // @namespace    https://github.com/JokerGermany/Scalable.capital-Userscripts
-// @version      0.6
+// @version      0.7
 // @description  Alle Informationen auf einen Blick, nur noch zum stornieren von offenen Transaktionen muss die Übersicht aufgerufen werden. Wesentliche Anlegerinformationen werden optional gelöscht.
 // @author       JokerGermany
 // @match        https://de.scalable.capital/broker/security?isin=*
@@ -22,6 +22,27 @@ function verkaufKaufKlicken() {
     }
     location.search = params.toString();
 }
+function wesentlicheAnlegerinformationenAusblenden(divs)
+{
+    var Produktdetails = /^Produktdetails$/i;
+            for (let i = 0;i< divs.length;i++)
+            {
+                if (Produktdetails.test(divs[i].innerHTML))
+                    {
+                        //Doppelcheck!
+                        if (divs[i-1].innerHTML.includes("Produktdetails"))
+                        {
+                            if (divs[i+1].innerHTML.includes("Wesentlichen Anlegerinformationen"))
+                            {
+                                divs[i+1].remove();
+                            }
+                            divs[i-2].remove();
+                            divs[i-1].remove();
+                        }
+                        return true;
+                    }
+            }
+}
 
 function transaktionOrderDurchsuchen(Ort)
 {
@@ -30,13 +51,13 @@ function transaktionOrderDurchsuchen(Ort)
     var ausfuehrungsPreis;
     var stueck;
     var gesamt;
-
-    var Offen = Ort.childNodes[2].childNodes[1].classList.contains("jss179") && (Ort.childNodes[2].childNodes[1].innerHTML == "Ausstehend")
-    var Storno = Ort.childNodes[2].childNodes[1].classList.contains("jss179") && (Ort.childNodes[2].childNodes[1].innerHTML == "Storniert")
+    var Offen = Ort.childNodes[2].childNodes[1].classList.contains("jss177") && (Ort.childNodes[2].childNodes[1].innerHTML == "Ausstehend")
+    var Storno = Ort.childNodes[2].childNodes[1].classList.contains("jss177") && (Ort.childNodes[2].childNodes[1].innerHTML == "Storniert")
     var ETFName = document.getElementsByClassName("jss83")[0].getElementsByTagName("span")[1].innerHTML;
-    if ( Ort.getElementsByClassName("jss171")[0].innerHTML != ETFName )
+    var transaktionETFNameClass="jss174"
+    if ( Ort.getElementsByClassName(transaktionETFNameClass)[0].innerHTML != ETFName )
     {
-     //console.log("Wurde schon bearbeitet"+ETFName+" != "+Ort.getElementsByClassName("jss171")[0].innerHTML);
+     //console.log("Wurde schon bearbeitet"+ETFName+" != "+Ort.getElementsByClassName(transaktionETFNameClass)[0].innerHTML);
      return;
     }
     if (Offen && Storno)
@@ -48,7 +69,7 @@ function transaktionOrderDurchsuchen(Ort)
         console.log("Storno");
         return;
     }
-    if (Ort.childNodes[1].childNodes[0].classList.contains("jss170"))
+    if (Ort.childNodes[1].childNodes[0].classList.contains("jss173"))
     {
         if (Ort.childNodes[1].childNodes[0].innerHTML == "Verkauf" || Ort.childNodes[1].childNodes[0].innerHTML == "Kauf")
         {
@@ -97,19 +118,19 @@ function transaktionOrderDurchsuchen(Ort)
                                 {
                                     var limitPreisString = orderUebersicht[i].querySelector('[data-testid="value-Limitpreis"]').innerHTML;
                                     //console.log("limitPreisString: "+limitPreisString);
-                                    Ort.getElementsByClassName("jss171")[0].innerHTML = "Limitpreis: "+limitPreisString;
+                                    Ort.getElementsByClassName(transaktionETFNameClass)[0].innerHTML = "Limitpreis: "+limitPreisString;
                                 }
                                 if (orderUebersicht[i].querySelector('[data-testid="value-Stoppreis"]') != null)
                                 {
                                     var stopPreisString = orderUebersicht[i].querySelector('[data-testid="value-Stoppreis"]').innerHTML;
                                     //console.log("limitPreisString: "+limitPreisString);
-                                    if ( Ort.getElementsByClassName("jss171")[0].innerHTML == ETFName )
+                                    if ( Ort.getElementsByClassName(transaktionETFNameClass)[0].innerHTML == ETFName )
                                     {
-                                        Ort.getElementsByClassName("jss171")[0].innerHTML = "Stoppreis: "+stopPreisString;
+                                        Ort.getElementsByClassName(transaktionETFNameClass)[0].innerHTML = "Stoppreis: "+stopPreisString;
                                     }
-                                    else if ( Ort.getElementsByClassName("jss171")[0].innerHTML != ETFName && !(Ort.getElementsByClassName("jss171")[0].innerHTML.includes("Stoppreis:")))
+                                    else if ( Ort.getElementsByClassName(transaktionETFNameClass)[0].innerHTML != ETFName && !(Ort.getElementsByClassName(transaktionETFNameClass)[0].innerHTML.includes("Stoppreis:")))
                                     {
-                                        Ort.getElementsByClassName("jss171")[0].innerHTML += "Stoppreis: "+stopPreisString;
+                                        Ort.getElementsByClassName(transaktionETFNameClass)[0].innerHTML += "Stoppreis: "+stopPreisString;
                                     }
                                     else
                                     {
@@ -120,13 +141,13 @@ function transaktionOrderDurchsuchen(Ort)
                                 if (orderUebersicht[i].querySelector('[data-testid="value-Ausführungspreis"]') != null && Offen == false)
                                 {
                                     var ausfuehrungsPreisString = orderUebersicht[i].querySelector('[data-testid="value-Ausführungspreis"]').innerHTML;
-                                    if ( Ort.getElementsByClassName("jss171")[0].innerHTML == ETFName )
+                                    if ( Ort.getElementsByClassName(transaktionETFNameClass)[0].innerHTML == ETFName )
                                     {
-                                        Ort.getElementsByClassName("jss171")[0].innerHTML = "Ausführungspreis: "+ausfuehrungsPreisString;
+                                        Ort.getElementsByClassName(transaktionETFNameClass)[0].innerHTML = "Ausführungspreis: "+ausfuehrungsPreisString;
                                     }
                                     else
                                     {
-                                        Ort.getElementsByClassName("jss171")[0].innerHTML += " Ausführungspreis: "+ausfuehrungsPreisString;
+                                        Ort.getElementsByClassName(transaktionETFNameClass)[0].innerHTML += " Ausführungspreis: "+ausfuehrungsPreisString;
                                     }
                                 }
                                 else if (Offen == false)
@@ -203,11 +224,11 @@ function isNumber(n) {
     return parseFloat(n);
 }
 function doagain([durchschnitt, produktdetailsGefunden])
-{        
+{
     if ( !(window.location.href.includes("BUY")) && !(window.location.href.includes("SELL")) && !(document.getElementsByClassName("MuiButton-label")[0].innerHTML == "Schließen") )
     {
         //console.log(document.getElementsByClassName("MuiButton-label jss129")[1].innerHTML);
-        var wesentlicheAnlegerinformationenAusblenden = 1;
+        var wesentlicheAnlegerinformationenAusblendenVar = 1;
         var alteTransaktionenAusblenden = 1;
         var genauererDurchschnittlicherKaufpreis = 1;
         const d = new Date();
@@ -219,8 +240,11 @@ function doagain([durchschnitt, produktdetailsGefunden])
 
         var divs = document.getElementsByTagName("div");
 
-        if (wesentlicheAnlegerinformationenAusblenden == 1 && oeffnungszeiten && produktdetailsGefunden != true)
+        var erwartetTransaktionen;
+        console.log(produktdetailsGefunden);
+        if (wesentlicheAnlegerinformationenAusblendenVar == 1 && oeffnungszeiten && produktdetailsGefunden != true)
         {
+            erwartetTransaktionen = document.getElementsByClassName("jss150")[1];
             var Produktdetails = /^Produktdetails$/i;
             for (let i = 0;i< divs.length;i++)
             {
@@ -229,20 +253,30 @@ function doagain([durchschnitt, produktdetailsGefunden])
                     //Doppelcheck!
                     if (divs[i-1].innerHTML.includes("Produktdetails"))
                     {
+                        if (divs[i+1].innerHTML.includes("Wesentlichen Anlegerinformationen"))
+                        {
+                            divs[i+1].remove();
+                        }
+                        divs[i-2].remove();
                         divs[i-1].remove();
                     }
-                    if (divs[i+1].innerHTML.includes("Wesentlichen Anlegerinformationen"))
-                    {
-                        divs[i+1].remove();
-                    }
                     produktdetailsGefunden = true;
+                    break;
                 }
             }
+            erwartetTransaktionen = document.getElementsByClassName("jss150")[1];
         }
+        if (wesentlicheAnlegerinformationenAusblendenVar != 1)
+        {
+            erwartetTransaktionen = document.getElementsByClassName("jss150")[2];
+        }
+        //divs = document.getElementsByTagName("div");
+
 
 
         //console.log("jss150"+document.getElementsByClassName("jss150")[1].innerHTML);
-        var erwartetTransaktionen = document.getElementsByClassName("jss150")[1];
+
+
         //console.log(erwartetTransaktionen);
 
 
@@ -268,9 +302,12 @@ function doagain([durchschnitt, produktdetailsGefunden])
                 if (erwartetTransaktionen == null || erwartetTransaktionen.innerHTML != "Transaktionen")
                 {
                     //Wenn Transaktion gefunden, aber nicht in Element jss62, dann neu Laden
-                    window.open(location.href);
-                    window.close();
-                    alert('neustart - Mehr Transaktionsinformationen ohne ausklappen');
+                    //window.open(location.href);
+                    //window.close();
+                    location.reload();
+                    console.log("neustart - Mehr Transaktionsinformationen ohne ausklappen");
+                    console.log(erwartetTransaktionen.innerHTML);
+                    //alert('neustart - Mehr Transaktionsinformationen ohne ausklappen');
                     //window.open(location.href);
                     //window.close();
                     //das Beste wäre, wenn man das script hier killen könnte...
@@ -330,7 +367,7 @@ function doagain([durchschnitt, produktdetailsGefunden])
         }
 
         
-        var erwartetTagClass = "jss162";
+        var erwartetTagClass = "jss165";
         var erwartetTag = erwartetTransaktionen.parentNode.childNodes[1].getElementsByClassName(erwartetTagClass);
         //console.log("Offen: "+erwartetTag[0].innerHTML);
 //console.log(erwartetTag[0].innerHTML);
@@ -346,7 +383,7 @@ function doagain([durchschnitt, produktdetailsGefunden])
         )
         {
             //console.log(document.getElementsByClassName("jss158")[0].getElementsByTagName("div").length);
-            var divTransaktion = document.getElementsByClassName("jss160")[0].childNodes[0].childNodes[0].childNodes;
+            var divTransaktion = document.getElementsByClassName("jss163")[0].childNodes[0].childNodes[0].childNodes;
             //console.log(divTransaktion.length);
             //var offenJetzt;
             for (let i = 0;i< divTransaktion.length;i++)
@@ -400,6 +437,10 @@ function doagain([durchschnitt, produktdetailsGefunden])
     'use strict';
     var durchschnitt;
     var produktdetailsGefunden = false;
-    var vars = doagain([durchschnitt,produktdetailsGefunden]);
+    var vars = [durchschnitt,produktdetailsGefunden]
+    //load Funktion, sonst stellt das Skript von SC die wesentlichen Anlegerinformationen wieder her nachdem es das Skript gelöscht hat
+    window.addEventListener('load', function() {
+    doagain(vars)
+    }, false);
     setInterval(function(){doagain(vars);}, 15000);
 })();
