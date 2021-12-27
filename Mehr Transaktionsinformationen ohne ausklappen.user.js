@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mehr Transaktionsinformationen ohne ausklappen
 // @namespace    https://github.com/JokerGermany/Scalable.capital-Userscripts
-// @version      0.9
+// @version      1.0
 // @description  Alle Informationen auf einen Blick, nur noch zum stornieren von offenen Transaktionen muss die Übersicht aufgerufen werden. Wesentliche Anlegerinformationen werden optional gelöscht.
 // @author       JokerGermany
 // @match        https://de.scalable.capital/broker/security?isin=*
@@ -120,7 +120,8 @@ function transaktionOrderDurchsuchen(Ort)
                                 if (orderUebersicht[i].querySelector('[data-testid="value-Ausführungspreis"]') != null && Offen == false)
                                 {
                                     stueck = orderUebersicht[i].querySelector('[data-testid="value-Ausgeführte Stückzahl"]').getElementsByTagName("span")[0].innerHTML;
-                                    var kurswert = isNumber(orderUebersicht[i].querySelector('[data-testid="value-Kurswert"]').innerHTML);
+                                    //var kurswert = isNumber(orderUebersicht[i].querySelector('[data-testid="value-Kurswert"]').innerHTML);
+                                    var kurswert = Math.abs(isNumber(orderUebersicht[i].querySelector('[data-testid="total-amount"]').getElementsByTagName("span")[0].innerHTML))
                                     console.log("Stück: "+stueck+" Kurswert:"+kurswert);
                                     var ausfuehrungsPreisString = (Number(kurswert)/Number(stueck)).toLocaleString("de-DE",{ maximumFractionDigits: 4 });
                                     if ( Ort.getElementsByClassName(transaktionETFNameClass)[0].innerHTML == ETFName )
@@ -137,8 +138,6 @@ function transaktionOrderDurchsuchen(Ort)
                                     console.log("Beim Ausführungspreis läuft was falsch");
                                     alarm();
                                 }
-
-
                                 orderUebersicht[i].getElementsByClassName("MuiButton-label")[0].click();
                                 //document.getElementsByClassName("MuiDialog-root")[0].remove();
                                 gefunden = true;
