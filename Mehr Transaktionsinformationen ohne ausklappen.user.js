@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mehr Transaktionsinformationen ohne ausklappen
 // @namespace    https://github.com/JokerGermany/Scalable.capital-Userscripts
-// @version      1.0
+// @version      1.1
 // @description  Alle Informationen auf einen Blick, nur noch zum stornieren von offenen Transaktionen muss die Übersicht aufgerufen werden. Wesentliche Anlegerinformationen werden optional gelöscht.
 // @author       JokerGermany
 // @match        https://de.scalable.capital/broker/security?isin=*
@@ -30,10 +30,10 @@ function transaktionOrderDurchsuchen(Ort)
     var ausfuehrungsPreis;
     var stueck;
     var gesamt;
-    var Offen = Ort.childNodes[2].childNodes[1].classList.contains("jss177") && (Ort.childNodes[2].childNodes[1].innerHTML == "Ausstehend")
-    var Storno = Ort.childNodes[2].childNodes[1].classList.contains("jss177") && (Ort.childNodes[2].childNodes[1].innerHTML == "Storniert")
+    var Offen = Ort.childNodes[2].childNodes[1].classList.contains("jss193") && (Ort.childNodes[2].childNodes[1].innerHTML == "Ausstehend")
+    var Storno = Ort.childNodes[2].childNodes[1].classList.contains("jss193") && (Ort.childNodes[2].childNodes[1].innerHTML == "Storniert")
     var ETFName = document.getElementsByClassName("jss83")[0].getElementsByTagName("span")[1].innerHTML;
-    var transaktionETFNameClass="jss174"
+    var transaktionETFNameClass="jss190"
     if ( Ort.getElementsByClassName(transaktionETFNameClass)[0].innerHTML != ETFName )
     {
      //console.log("Wurde schon bearbeitet"+ETFName+" != "+Ort.getElementsByClassName(transaktionETFNameClass)[0].innerHTML);
@@ -45,10 +45,10 @@ function transaktionOrderDurchsuchen(Ort)
     }
     if (Storno)
     {
-        console.log("Storno");
+        //console.log("Storno");
         return;
     }
-    if (Ort.childNodes[1].childNodes[0].classList.contains("jss173"))
+    if (Ort.childNodes[1].childNodes[0].classList.contains("jss189"))
     {
         if (Ort.childNodes[1].childNodes[0].innerHTML == "Verkauf" || Ort.childNodes[1].childNodes[0].innerHTML == "Kauf")
         {
@@ -122,7 +122,7 @@ function transaktionOrderDurchsuchen(Ort)
                                     stueck = orderUebersicht[i].querySelector('[data-testid="value-Ausgeführte Stückzahl"]').getElementsByTagName("span")[0].innerHTML;
                                     //var kurswert = isNumber(orderUebersicht[i].querySelector('[data-testid="value-Kurswert"]').innerHTML);
                                     var kurswert = Math.abs(isNumber(orderUebersicht[i].querySelector('[data-testid="total-amount"]').getElementsByTagName("span")[0].innerHTML))
-                                    console.log("Stück: "+stueck+" Kurswert:"+kurswert);
+                                    //console.log("Stück: "+stueck+" Kurswert:"+kurswert);
                                     var ausfuehrungsPreisString = (Number(kurswert)/Number(stueck)).toLocaleString("de-DE",{ maximumFractionDigits: 4 });
                                     if ( Ort.getElementsByClassName(transaktionETFNameClass)[0].innerHTML == ETFName )
                                     {
@@ -149,10 +149,10 @@ function transaktionOrderDurchsuchen(Ort)
                     {
                         clearInterval(checkExist);
                     }
-                    //wenn kleiner 43 Millisekunden und nichts gefunden, dann ziehe eine Sekunde ab.
+                    //wenn kleiner 213 Millisekunden und nichts gefunden, dann ziehe eine Sekunde ab.
                     if ( i == (orderUebersicht.length - 1))
                     {
-                        if (orderZeit.getMilliseconds() < 43 && durchlaufen > 0 && runter < 3)
+                        if (orderZeit.getMilliseconds() < 213 && durchlaufen > 0 && runter < 3)
                         {
                             orderZeit = new Date(orderZeit-(orderZeit.getMilliseconds()+1));
                             verlaufZeit = orderZeit.toLocaleDateString('de-DE', {day: '2-digit'})+" "+orderZeit.toLocaleDateString('de-DE', {month: 'short'})+" "+orderZeit.toLocaleDateString('de-DE', {year: 'numeric'})+", "+orderZeit.toLocaleTimeString('de-DE');
@@ -183,16 +183,13 @@ function transaktionOrderDurchsuchen(Ort)
                 }
             }, 100);
         var gefunden = false;
-      
         }
         else
         {
             alarm();
         }
     }
-
     //console.log("Offen: "+Offen+" Storno: "+Storno);
-
 }
 
 function alarm() {
@@ -205,7 +202,7 @@ function isNumber(n) {
     n = n.replace(/\./g, '').replace(',', '.');
     return parseFloat(n);
 }
-function doagain([durchschnitt, produktdetailsGefunden])
+function doagain([durchschnitt, produktdetailsGefunden, uebersichtGefunden])
 {
     if ( !(window.location.href.includes("BUY")) && !(window.location.href.includes("SELL")) && !(document.getElementsByClassName("MuiButton-label")[0].innerHTML == "Schließen") )
     {
@@ -223,34 +220,63 @@ function doagain([durchschnitt, produktdetailsGefunden])
         var divs = document.getElementsByTagName("div");
 
         var erwartetTransaktionen;
-        console.log(produktdetailsGefunden);
-        if (wesentlicheAnlegerinformationenAusblendenVar == 1 && oeffnungszeiten && produktdetailsGefunden != true)
+        if (wesentlicheAnlegerinformationenAusblendenVar == 1 && oeffnungszeiten && produktdetailsGefunden != true && uebersichtGefunden !=true)
         {
-            erwartetTransaktionen = document.getElementsByClassName("jss150")[1];
-            var Produktdetails = /^Produktdetails$/i;
+            var produktdetails = /^Produktdetails$/i;
+            var uebersicht = /^Übersicht$/i;
             for (let i = 0;i< divs.length;i++)
             {
-                if (Produktdetails.test(divs[i].innerHTML))
+                //console.log(divs[i].innerHTML);
+                if (uebersicht.test(divs[i].innerHTML))
                 {
                     //Doppelcheck!
+                    if (divs[i-2].innerHTML.includes("Übersicht"))
+                    {
+                        divs[i-2].remove();
+                    }
+                    else
+                    {
+                        console.log("Übersicht Problem");
+                        alarm();
+                    }
+                    uebersichtGefunden = true;
                     if (divs[i-1].innerHTML.includes("Produktdetails"))
                     {
                         if (divs[i+1].innerHTML.includes("Wesentlichen Anlegerinformationen"))
                         {
                             divs[i+1].remove();
                         }
+                        divs[i-3].remove();
                         divs[i-2].remove();
-                        divs[i-1].remove();
+                        divs[i-2].remove();
+                        divs[i-3].remove();
+                        //console.log(divs[i].outerHTML);
+                    }
+                    else
+                    {
+                        console.log("Produktdetails Problem");
+                        alarm();
                     }
                     produktdetailsGefunden = true;
                     break;
                 }
             }
+        }
+        if (uebersichtGefunden && produktdetailsGefunden)
+        {
             erwartetTransaktionen = document.getElementsByClassName("jss150")[1];
+        }
+        else if (!(uebersichtGefunden) && !(produktdetailsGefunden))
+        {
+            erwartetTransaktionen = document.getElementsByClassName("jss150")[3];
+        }
+        else if (uebersichtGefunden && !(produktdetailsGefunden) || (!(uebersichtGefunden) && produktdetailsGefunden))
+        {
+            erwartetTransaktionen = document.getElementsByClassName("jss150")[2];
         }
         if (wesentlicheAnlegerinformationenAusblendenVar != 1 || oeffnungszeiten == false )
         {
-            erwartetTransaktionen = document.getElementsByClassName("jss150")[2];
+            erwartetTransaktionen = document.getElementsByClassName("jss150")[3];
         }
         //divs = document.getElementsByTagName("div");
 
@@ -347,9 +373,7 @@ function doagain([durchschnitt, produktdetailsGefunden])
                 //console.log("Stück: "+Stueck+" Kaufpreis: "+Kaufpreis+" Durchschnitt: "+erwartetesDurchschnittsKaufpreisFeld[2].innerHTML);
             }
         }
-
-        
-        var erwartetTagClass = "jss165";
+        var erwartetTagClass = "jss181";
         var erwartetTag = erwartetTransaktionen.parentNode.childNodes[1].getElementsByClassName(erwartetTagClass);
         //console.log("Offen: "+erwartetTag[0].innerHTML);
 //console.log(erwartetTag[0].innerHTML);
@@ -365,7 +389,7 @@ function doagain([durchschnitt, produktdetailsGefunden])
         )
         {
             //console.log(document.getElementsByClassName("jss158")[0].getElementsByTagName("div").length);
-            var divTransaktion = document.getElementsByClassName("jss163")[0].childNodes[0].childNodes[0].childNodes;
+            var divTransaktion = document.getElementsByClassName("jss179")[0].childNodes[0].childNodes[0].childNodes;
             //console.log(divTransaktion.length);
             //var offenJetzt;
             for (let i = 0;i< divTransaktion.length;i++)
@@ -378,7 +402,6 @@ function doagain([durchschnitt, produktdetailsGefunden])
                 }
             }
         }
-
     }
     else if ( (window.location.href.includes("BUY")) || (window.location.href.includes("SELL")) )
     {
@@ -410,7 +433,7 @@ function doagain([durchschnitt, produktdetailsGefunden])
 
 
     }
-    return [durchschnitt, produktdetailsGefunden];
+    return [durchschnitt, produktdetailsGefunden, uebersichtGefunden];
 }
 
 
@@ -419,10 +442,11 @@ function doagain([durchschnitt, produktdetailsGefunden])
     'use strict';
     var durchschnitt;
     var produktdetailsGefunden = false;
-    var vars = [durchschnitt,produktdetailsGefunden]
+    var uebersichtGefunden = false;
+    var vars = [durchschnitt,produktdetailsGefunden,uebersichtGefunden]
     //load Funktion, sonst stellt das Skript von SC die wesentlichen Anlegerinformationen wieder her nachdem es das Skript gelöscht hat
     window.addEventListener('load', function() {
-    doagain(vars)
+    vars = doagain(vars)
     }, false);
     setInterval(function(){doagain(vars);}, 15000);
 })();
